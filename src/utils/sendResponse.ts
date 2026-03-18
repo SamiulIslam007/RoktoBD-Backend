@@ -7,20 +7,22 @@ interface ApiResponse<T = unknown> {
 }
 
 interface SendResponseOptions<T = unknown> {
-  res: Response;
   statusCode: number;
+  success?: boolean;
   message: string;
   data?: T;
 }
 
 export function sendResponse<T = unknown>(
+  res: Response,
   options: SendResponseOptions<T>
 ): void {
-  const { res, statusCode, message, data } = options;
+  const { statusCode, message, data } = options;
+  const success = options.success ?? (statusCode >= 200 && statusCode < 300);
 
   try {
     const responseBody: ApiResponse<T> = {
-      success: statusCode >= 200 && statusCode < 300,
+      success,
       message,
       ...(data !== undefined && { data }),
     };
@@ -30,7 +32,7 @@ export function sendResponse<T = unknown>(
     try {
       res.status(statusCode).send(
         JSON.stringify({
-          success: statusCode >= 200 && statusCode < 300,
+          success,
           message,
           ...(data !== undefined && { data }),
         })
@@ -43,3 +45,5 @@ export function sendResponse<T = unknown>(
     }
   }
 }
+
+export default sendResponse;
