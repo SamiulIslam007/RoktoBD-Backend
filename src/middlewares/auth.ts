@@ -1,6 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
+<<<<<<< HEAD
 import sendResponse from '../utils/sendResponse';
+=======
+import { sendResponse } from '../utils/sendResponse';
+>>>>>>> feat/auth
 
 const JWT_SECRET = process.env.JWT_SECRET || 'roktobd-secret';
 

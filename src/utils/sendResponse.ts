@@ -1,11 +1,5 @@
 import { Response } from 'express';
 
-interface ApiResponse<T = unknown> {
-  success: boolean;
-  message: string;
-  data?: T;
-}
-
 interface SendResponseOptions<T = unknown> {
   statusCode: number;
   success?: boolean;
@@ -21,7 +15,11 @@ export function sendResponse<T = unknown>(
   const success = options.success ?? (statusCode >= 200 && statusCode < 300);
 
   try {
+<<<<<<< HEAD
     const responseBody: ApiResponse<T> = {
+=======
+    const responseBody = {
+>>>>>>> feat/auth
       success,
       message,
       ...(data !== undefined && { data }),

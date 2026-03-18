@@ -83,11 +83,11 @@ async function main() {
   console.log("Seeding database...");
 
   const TEST_USERS = [
-    { phone: "01710000001", name: "Test Donor", role: "DONOR" as const },
-    { phone: "01710000002", name: "Test Requester", role: "REQUESTER" as const },
-    { phone: "01710000003", name: "Test Hospital", role: "HOSPITAL" as const },
-    { phone: "01710000004", name: "Test Admin", role: "ADMIN" as const },
-    { phone: "01710000005", name: "Test User 5", role: "REQUESTER" as const },
+    { phone: "01710000001", name: "Test Donor", email: "donor@test.com", role: "DONOR" as const },
+    { phone: "01710000002", name: "Test Requester", email: "requester@test.com", role: "REQUESTER" as const },
+    { phone: "01710000003", name: "Test Hospital", email: "hospital@test.com", role: "HOSPITAL" as const },
+    { phone: "01710000004", name: "Test Admin", email: "admin@test.com", role: "ADMIN" as const },
+    { phone: "01710000005", name: "Test User 5", email: "user5@test.com", role: "REQUESTER" as const },
   ];
 
   const hashedPassword = await bcrypt.hash(TEST_PASSWORD, 10);
@@ -98,6 +98,7 @@ async function main() {
       await prisma.user.create({
         data: {
           phone: u.phone,
+          email: u.email,
           name: u.name,
           role: u.role,
           password: hashedPassword,
