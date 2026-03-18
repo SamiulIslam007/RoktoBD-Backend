@@ -1,26 +1,22 @@
 import { Response } from 'express';
 
-interface ApiResponse<T = unknown> {
-  success: boolean;
-  message: string;
-  data?: T;
-}
-
 interface SendResponseOptions<T = unknown> {
-  res: Response;
   statusCode: number;
+  success?: boolean;
   message: string;
   data?: T;
 }
 
 export function sendResponse<T = unknown>(
+  res: Response,
   options: SendResponseOptions<T>
 ): void {
-  const { res, statusCode, message, data } = options;
+  const { statusCode, message, data } = options;
+  const success = options.success ?? (statusCode >= 200 && statusCode < 300);
 
   try {
-    const responseBody: ApiResponse<T> = {
-      success: statusCode >= 200 && statusCode < 300,
+    const responseBody = {
+      success,
       message,
       ...(data !== undefined && { data }),
     };
