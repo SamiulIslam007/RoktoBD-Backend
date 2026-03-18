@@ -78,7 +78,7 @@ const DISTRICTS = [
 ] as const;
 
 async function main() {
-  console.log("🌱 Seeding database...");
+  console.log("Seeding database...");
 
   for (const d of DISTRICTS) {
     const existing = await prisma.district.findFirst({
@@ -123,12 +123,12 @@ async function main() {
     }
   }
 
-  console.log("✅ Seed completed!");
+  console.log("Seed completed!");
 }
 
 main()
   .catch((e) => {
-    console.error("❌ Seed failed:", e);
+    console.error("Seed failed:", e);
     process.exit(1);
   })
   .finally(async () => {
