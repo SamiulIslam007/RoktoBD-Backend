@@ -7,8 +7,6 @@ datasource db {
   provider = "postgresql"
 }
 
-// enums
-
 enum UserRole {
   DONOR
   REQUESTER
@@ -47,6 +45,13 @@ enum NotificationChannel {
   EMAIL
 }
 
+enum RequestedFor {
+  SELF
+  FAMILY
+  FRIEND
+  OTHER
+}
+
 model District {
   id        String   @id @default(uuid())
   name      String
@@ -56,6 +61,9 @@ model District {
   cities        City[]
   donors        Donor[]
   bloodRequests BloodRequest[]
+  hospitals     Hospital[]
+
+  @@index([name])
 }
 
 model City {
@@ -68,19 +76,18 @@ model City {
   district      District       @relation(fields: [districtId], references: [id], onDelete: Cascade)
   donors        Donor[]
   bloodRequests BloodRequest[]
+  hospitals     Hospital[]
 
   @@index([districtId])
 }
 
-
-// models
 model User {
   id                  String   @id @default(uuid())
   phone               String   @unique
   password            String?
   name                String
   role                UserRole
-  email               String?
+  email               String   @unique
   fcmToken            String?
   webPushSubscription Json?
   createdAt           DateTime @default(now())
@@ -97,12 +104,14 @@ model User {
   chatsAsParticipant2 Chat[] @relation("ChatParticipant2")
 
   @@index([role])
+  @@index([email])
 }
 
 model Donor {
   id               String     @id @default(uuid())
   userId           String     @unique
   bloodGroup       BloodGroup
+  dateOfBirth      DateTime
   districtId       String
   cityId           String?
   lastDonationDate DateTime?
@@ -126,14 +135,19 @@ model Hospital {
   hospitalName  String
   address       String?
   contactPerson String
+  districtId    String?
+  cityId        String?
   verified      Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  district    District?    @relation(fields: [districtId], references: [id])
+  city        City?       @relation(fields: [cityId], references: [id])
   bloodStocks BloodStock[]
 
   @@index([verified])
+  @@index([districtId])
 }
 
 model BloodRequest {
@@ -145,6 +159,8 @@ model BloodRequest {
   location     String?
   hospitalName String?
   contactPhone String?
+  requestedFor RequestedFor?
+  patientName  String?
   status       RequestStatus @default(OPEN)
   districtId   String?
   cityId       String?
@@ -153,7 +169,7 @@ model BloodRequest {
 
   requester     User           @relation("RequestCreator", fields: [requesterId], references: [id], onDelete: Cascade)
   district      District?      @relation(fields: [districtId], references: [id])
-  city          City?          @relation(fields: [cityId], references: [id])
+  city          City?         @relation(fields: [cityId], references: [id])
   notifications Notification[]
   chats         Chat[]
 
