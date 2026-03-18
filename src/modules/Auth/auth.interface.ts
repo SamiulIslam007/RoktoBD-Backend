@@ -2,9 +2,16 @@ export interface SendOtpBody {
   phone: string;
 }
 
-export interface VerifyOtpBody {
+export interface RegisterBody {
   phone: string;
   otp: string;
+  password: string;
+  name: string;
+}
+
+export interface LoginBody {
+  phone: string;
+  password: string;
 }
 
 export interface AuthUser {
@@ -12,9 +19,4 @@ export interface AuthUser {
   phone: string;
   name: string;
   role: string;
-}
-
-export interface VerifyOtpResponse {
-  accessToken: string;
-  user: AuthUser;
 }

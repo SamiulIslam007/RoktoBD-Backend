@@ -18,9 +18,32 @@ const sendOtp = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-const verifyOtp = async (req: Request, res: Response, next: NextFunction) => {
+const register = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const result = await AuthService.verifyOtp(req.body);
+    const result = await AuthService.register(req.body);
+    const { refreshToken, ...responseData } = result;
+
+    res.cookie(AUTH_COOKIE_NAME, refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: COOKIE_MAX_AGE_7_DAYS,
+    });
+
+    sendResponse(res, {
+      statusCode: 201,
+      success: true,
+      message: 'Registration successful',
+      data: responseData,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const login = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const result = await AuthService.login(req.body);
     const { refreshToken, ...responseData } = result;
 
     res.cookie(AUTH_COOKIE_NAME, refreshToken, {
@@ -33,7 +56,7 @@ const verifyOtp = async (req: Request, res: Response, next: NextFunction) => {
     sendResponse(res, {
       statusCode: 200,
       success: true,
-      message: 'OTP verified successfully',
+      message: 'Logged in successfully',
       data: responseData,
     });
   } catch (error) {
@@ -105,7 +128,8 @@ const logout = async (_req: Request, res: Response, next: NextFunction) => {
 
 export const AuthController = {
   sendOtp,
-  verifyOtp,
+  register,
+  login,
   getMe,
   refreshToken,
   logout,
