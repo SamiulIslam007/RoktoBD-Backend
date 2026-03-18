@@ -52,6 +52,12 @@ enum RequestedFor {
   OTHER
 }
 
+enum HospitalResponseStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
+}
+
 model District {
   id        String   @id @default(uuid())
   name      String
@@ -96,6 +102,7 @@ model User {
   donor                    Donor?
   hospital                 Hospital?
   bloodRequestsAsRequester BloodRequest[] @relation("RequestCreator")
+  bloodReceipts            BloodReceipt[]
   notifications            Notification[]
   messages                 Message[]
   refreshTokens            RefreshToken[]
@@ -141,10 +148,11 @@ model Hospital {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  district    District?    @relation(fields: [districtId], references: [id])
-  city        City?       @relation(fields: [cityId], references: [id])
-  bloodStocks BloodStock[]
+  user             User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  district         District?               @relation(fields: [districtId], references: [id])
+  city             City?                  @relation(fields: [cityId], references: [id])
+  bloodStocks      BloodStock[]
+  requestResponses HospitalRequestResponse[]
 
   @@index([verified])
   @@index([districtId])
@@ -167,16 +175,49 @@ model BloodRequest {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
-  requester     User           @relation("RequestCreator", fields: [requesterId], references: [id], onDelete: Cascade)
-  district      District?      @relation(fields: [districtId], references: [id])
-  city          City?         @relation(fields: [cityId], references: [id])
-  notifications Notification[]
-  chats         Chat[]
+  requester         User                     @relation("RequestCreator", fields: [requesterId], references: [id], onDelete: Cascade)
+  district          District?                @relation(fields: [districtId], references: [id])
+  city              City?                    @relation(fields: [cityId], references: [id])
+  notifications     Notification[]
+  chats             Chat[]
+  hospitalResponses HospitalRequestResponse[]
+  bloodReceipts     BloodReceipt[]
 
   @@index([bloodGroup])
   @@index([status])
   @@index([requesterId])
   @@index([districtId])
+}
+
+model BloodReceipt {
+  id              String         @id @default(uuid())
+  userId          String
+  quantity        Int            @default(1)
+  receivedAt      DateTime       @default(now())
+  bloodRequestId  String?
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bloodRequest BloodRequest? @relation(fields: [bloodRequestId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([bloodRequestId])
+}
+
+model HospitalRequestResponse {
+  id             String                @id @default(uuid())
+  hospitalId     String
+  bloodRequestId String
+  status         HospitalResponseStatus @default(PENDING)
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  hospital     Hospital     @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+  bloodRequest BloodRequest @relation(fields: [bloodRequestId], references: [id], onDelete: Cascade)
+
+  @@unique([hospitalId, bloodRequestId])
+  @@index([hospitalId])
+  @@index([bloodRequestId])
+  @@index([status])
 }
 
 model BloodStock {
